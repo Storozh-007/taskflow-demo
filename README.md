@@ -2,6 +2,10 @@
 
 Навчальний PWA-застосунок за КП 2–3: Vue 3, Framework7 та Vite.
 
+Застосунок: https://taskflow-demo.kpidanil.workers.dev
+
+Репозиторій: https://github.com/Storozh-007/taskflow-demo
+
 ## Запуск
 
 ```sh
