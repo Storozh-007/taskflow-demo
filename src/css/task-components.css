@@ -52,3 +52,4 @@
   .tf3-priority--medium { background: #4a3416; color: #fde68a; }
   .tf3-priority--high { background: #5a2530; color: #fecdd3; }
 }
+.navbar .link, .section-heading .link { color: var(--taskflow-primary); }
