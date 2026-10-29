@@ -37,7 +37,19 @@ npm run preview
 
 Завдання демонстраційні: додавання, редагування та серверне зберігання не входять до цієї роботи.
 
-## Публікація
+## Автоматична публікація з GitHub
+
+Cloudflare Workers Builds підключено до `Storozh-007/taskflow-demo`.
+
+- Production branch: `main`.
+- Root directory: `/` (корінь репозиторію).
+- Build command: `npm run build`.
+- Deploy command: `npx wrangler deploy`.
+- Preview command: `npx wrangler preview`.
+
+Після `git push origin main` Cloudflare встановлює залежності, збирає PWA та публікує нову версію. Результат доступний у Workers & Pages → taskflow-demo → Deployments та у перевірках коміту на GitHub.
+
+## Ручна публікація
 
 ```sh
 npx wrangler login
