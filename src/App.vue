@@ -1,5 +1,5 @@
 <template>
-  <f7-app v-bind="appParams"><f7-view main url="/" /></f7-app>
+  <f7-app v-bind="appParams"><f7-view main url="/" class="safe-areas" /></f7-app>
 </template>
 <script setup>
 import routes from './routes.js';

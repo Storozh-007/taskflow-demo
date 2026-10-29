@@ -1,6 +1,10 @@
 # TaskFlow
 
-Навчальний PWA-застосунок за КП 2–3: Vue 3, Framework7 та Vite.
+Навчальний PWA-застосунок за КП 2/4: Vue 3, Framework7 та Vite.
+
+Головна зі статистикою та останніми завданнями, окрема сторінка завдань, інформація про застосунок і довідка. Дані демонстраційні: 4 завдання, 2 виконані, 2 очікують виконання. Спільна нижня панель використовує маршрути Framework7. Додаткові завдання: HelpPage та обчислюваний показник «Очікує виконання».
+
+Попередню версію КП 2–3 збережено тегом `kp2-3-complete`.
 
 Застосунок: https://taskflow-demo.kpidanil.workers.dev
 
@@ -26,10 +30,11 @@ npm run preview
 
 - `src/main.js` — ініціалізація Vue і Framework7.
 - `src/App.vue` — кореневий застосунок та головний View.
-- `src/routes.js` — маршрути `/` і `/about/`.
+- `src/routes.js` — маршрути `/`, `/tasks/`, `/about/`, `/help/`.
 - `src/data/tasks.js` — чотири демонстраційні завдання.
-- `src/components/TaskCard.vue` — картка, що отримує завдання через prop `task`.
-- `src/pages/` — головна сторінка та інформація про застосунок.
+- `src/components/AppTabbar.vue` — спільна нижня навігація, prop `active` виділяє поточну сторінку.
+- `src/components/TaskCard.vue` — збережений компонент попередньої КП 2–3, у нових сторінках не використовується.
+- `src/pages/` — HomePage, TasksPage, AboutPage та HelpPage.
 - `src/css/app.css` — адаптивні стилі.
 - `public/icons/`, `scripts/generate-icons.mjs` — PWA-іконки; PNG генеруються перед збіркою.
 - `vite.config.js` — збірка, Web App Manifest і кешування Workbox.
@@ -61,3 +66,7 @@ npm run deploy
 Конфігурація статичних ресурсів: https://developers.cloudflare.com/workers/static-assets/
 
 `node_modules`, `dist`, `.env*`, `.dev.vars*` і `.wrangler` не додаються до Git; `package-lock.json` зберігається.
+
+## Перевірка КП 2/4
+
+На головній: 4 загалом, 2 виконано, 2 очікують виконання; останні записи в порядку 4, 3, 2. У списку всі 4 завдання. Перевірити три пункти нижньої панелі, кнопки головної, іконку інформації, довідку та повернення. Контрольні ширини: 320, 375, 768 px. PWA-іконки та шрифт Framework7 Icons кешуються для офлайн-роботи.
