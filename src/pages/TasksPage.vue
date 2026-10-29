@@ -23,10 +23,10 @@ function handleStatusChange(payload) { setTaskStatus(payload); }
 function handlePriorityChange(payload) { setTaskPriority(payload); }
 </script>
 <template>
-  <f7-page name="tasks" class="tf3-page">
+  <f7-page name="tasks">
     <f7-navbar title="Мої завдання" />
-    <div class="tf3-container">
-      <section class="tf3-hero"><div class="tf3-eyebrow">TASKFLOW / TASK MANAGER</div><h1>Мої завдання</h1><p>Керуйте завданнями, статусами та пріоритетами.</p></section>
+    <div class="app-content tf3-container">
+      <div class="page-heading"><h1>Завдання</h1><p>Список поточних завдань</p></div>
       <section class="tf3-filters" aria-label="Фільтри завдань">
         <div class="tf3-filter-group" role="group" aria-label="Фільтр за статусом">
           <div class="tf3-filter-title">Фільтр за статусом</div>
@@ -45,9 +45,9 @@ function handlePriorityChange(payload) { setTaskPriority(payload); }
           </div>
         </div>
       </section>
-      <section class="tf3-section">
-        <div class="tf3-section-heading"><div><div class="tf3-eyebrow">TASK LIST</div><h2>Список завдань</h2></div><TaskCounter :count="filteredTasks.length" /></div>
-        <div v-if="filteredTasks.length" class="tf3-task-grid">
+      <section class="tasks-section">
+        <div class="section-heading"><h2>Список завдань</h2><TaskCounter :count="filteredTasks.length" /></div>
+        <div v-if="filteredTasks.length" class="task-list tf3-task-grid">
           <TaskCard v-for="task in filteredTasks" :key="task.id" :task="task"
             @status-change="handleStatusChange" @priority-change="handlePriorityChange" />
         </div>

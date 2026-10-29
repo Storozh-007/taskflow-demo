@@ -41,7 +41,7 @@ npm run preview
 - `src/store/tasks.js` — спільний реактивний стан і функції зміни з перевіркою допустимих значень.
 - `src/pages/` — HomePage, TasksPage, AboutPage та HelpPage.
 - `src/css/app.css` — спільні адаптивні стилі та навігація.
-- `src/css/task-components.css` — темне оформлення карток, фільтрів і статистики.
+- `src/css/task-components.css` — оформлення КП 2/4 для інтерактивних карток, фільтрів і статистики з підтримкою теми пристрою.
 - `public/icons/`, `scripts/generate-icons.mjs` — PWA-іконки; PNG генеруються перед збіркою.
 - `vite.config.js` — збірка, Web App Manifest і кешування Workbox.
 - `wrangler.jsonc` — Cloudflare Workers Static Assets із SPA fallback.
