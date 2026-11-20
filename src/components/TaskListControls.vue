@@ -3,16 +3,21 @@ defineProps({
   search: { type: String, default: '' },
   status: { type: String, default: 'all' },
   priority: { type: String, default: 'all' },
+  project: { type: String, default: 'all' },
   sort: { type: String, default: 'newest' },
   onlyActive: { type: Boolean, default: false },
+  onlyNoDate: { type: Boolean, default: false },
+  projects: { type: Array, required: true },
 })
 
 const emit = defineEmits([
   'update:search',
   'update:status',
   'update:priority',
+  'update:project',
   'update:sort',
   'update:onlyActive',
+  'update:onlyNoDate',
   'reset',
 ])
 </script>
@@ -59,6 +64,16 @@ const emit = defineEmits([
       </label>
 
       <label>
+        Проєкт
+        <select :value="project" @change="emit('update:project', $event.target.value)">
+          <option value="all">Усі проєкти</option>
+          <option v-for="item in projects" :key="item.id" :value="item.id">
+            {{ item.title }}
+          </option>
+        </select>
+      </label>
+
+      <label>
         Сортування
         <select :value="sort" @change="emit('update:sort', $event.target.value)">
           <option value="newest">Спочатку нові</option>
@@ -82,6 +97,16 @@ const emit = defineEmits([
         @click="emit('update:onlyActive', !onlyActive)"
       >
         Тільки невиконані
+      </button>
+      <!-- Додаткове завдання 5 (робота №6): лише завдання без терміну -->
+      <button
+        type="button"
+        class="tf5-btn"
+        :class="{ 'tf5-btn--active': onlyNoDate }"
+        :aria-pressed="onlyNoDate"
+        @click="emit('update:onlyNoDate', !onlyNoDate)"
+      >
+        Лише без терміну
       </button>
       <button type="button" class="tf5-btn" @click="emit('reset')">
         Скинути фільтри

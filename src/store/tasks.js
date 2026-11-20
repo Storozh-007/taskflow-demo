@@ -1,68 +1,177 @@
-import { reactive } from 'vue'
+import { defineStore } from 'pinia'
 import initialTasks from '../data/tasks.js'
+import { useProjectsStore } from './projects.js'
 
-// Єдине реактивне сховище для HomePage і TasksPage.
-// Pinia та IndexedDB будемо використовувати в наступних роботах.
 const allowedStatuses = ['todo', 'progress', 'done']
 const allowedPriorities = ['low', 'medium', 'high']
 
-export const taskState = reactive({
-  tasks: initialTasks.map((task) => ({ ...task })),
-})
-
-function findTask(id) {
-  return taskState.tasks.find((task) => task.id === Number(id))
-}
-
-function normalizeValues(values = {}) {
+function normalizeValues(values, projects) {
   values = values ?? {}
+  const requestedProject = String(values.projectId ?? 'general')
+  const projectId = projects.some((project) => project.id === requestedProject)
+    ? requestedProject
+    : 'general'
+
   return {
     title: String(values.title ?? '').trim(),
     description: String(values.description ?? '').trim(),
     status: allowedStatuses.includes(values.status) ? values.status : 'todo',
     priority: allowedPriorities.includes(values.priority) ? values.priority : 'medium',
-    dueDate: values.dueDate || '',
+    dueDate: String(values.dueDate ?? ''),
+    projectId,
   }
 }
 
-export function addTask(values) {
-  const taskValues = normalizeValues(values)
-  if (!taskValues.title) return false
-
-  const nextId = Math.max(0, ...taskState.tasks.map((task) => task.id)) + 1
-  taskState.tasks.unshift({ id: nextId, ...taskValues })
-  return true
+function isValidTask(values) {
+  return values.title.length >= 3 && values.title.length <= 80 &&
+    values.description.length <= 500 &&
+    (!values.dueDate || /^\d{4}-\d{2}-\d{2}$/.test(values.dueDate))
 }
 
-export function updateTask(values) {
-  const task = findTask(values?.id)
-  if (!task) return false
+export const useTasksStore = defineStore('tasks', {
+  state: () => ({
+    // Старі записи без projectId належать проєкту «Загальні».
+    tasks: initialTasks.map((task) => ({
+      ...task,
+      projectId: task.projectId ?? 'general',
+    })),
+    searchText: '',
+    selectedStatus: 'all',
+    selectedPriority: 'all',
+    selectedProject: 'all',
+    sortOrder: 'newest',
+    onlyActive: false,
+    onlyNoDate: false,
+  }),
 
-  const taskValues = normalizeValues(values)
-  if (!taskValues.title) return false
-  Object.assign(task, taskValues)
-  return true
-}
+  getters: {
+    totalTasks: (state) => state.tasks.length,
+    completedTasks: (state) =>
+      state.tasks.filter((task) => task.status === 'done').length,
+    progressTasks: (state) =>
+      state.tasks.filter((task) => task.status === 'progress').length,
+    plannedTasks: (state) =>
+      state.tasks.filter((task) => task.status === 'todo').length,
+    completionPercent() {
+      return this.totalTasks
+        ? Math.round((this.completedTasks / this.totalTasks) * 100)
+        : 0
+    },
+    activeTasks: (state) => {
+      const rank = { high: 3, medium: 2, low: 1 }
+      return state.tasks
+        .filter((task) => task.status !== 'done')
+        .sort((a, b) => rank[b.priority] - rank[a.priority] || b.id - a.id)
+        .slice(0, 3)
+    },
+    visibleTasks: (state) => {
+      const term = state.searchText.trim().toLocaleLowerCase('uk-UA')
+      const rank = { high: 3, medium: 2, low: 1 }
+      const statusWeight = { progress: 0, todo: 1, done: 2 }
 
-export function setTaskStatus({ id, status }) {
-  if (!allowedStatuses.includes(status)) return false
-  const task = findTask(id)
-  if (!task) return false
-  task.status = status
-  return true
-}
+      // filter() створює новий масив: вихідний state.tasks не змінюється.
+      const filtered = state.tasks.filter((task) => {
+        const text = `${task.title} ${task.description ?? ''}`
+          .toLocaleLowerCase('uk-UA')
+        return (!term || text.includes(term)) &&
+          (state.selectedStatus === 'all' || task.status === state.selectedStatus) &&
+          (state.selectedPriority === 'all' || task.priority === state.selectedPriority) &&
+          (state.selectedProject === 'all' || task.projectId === state.selectedProject) &&
+          (!state.onlyActive || task.status !== 'done') &&
+          (!state.onlyNoDate || !task.dueDate)
+      })
 
-export function setTaskPriority({ id, priority }) {
-  if (!allowedPriorities.includes(priority)) return false
-  const task = findTask(id)
-  if (!task) return false
-  task.priority = priority
-  return true
-}
+      // sort() застосовуємо до нового масиву, а не до state.tasks.
+      return filtered.sort((a, b) => {
+        if (state.sortOrder === 'title') {
+          return a.title.localeCompare(b.title, 'uk-UA') || a.id - b.id
+        }
+        if (state.sortOrder === 'priority') {
+          return rank[b.priority] - rank[a.priority] || b.id - a.id
+        }
+        if (state.sortOrder === 'status') {
+          return statusWeight[a.status] - statusWeight[b.status] || b.id - a.id
+        }
+        if (state.sortOrder === 'dueDate' || state.sortOrder === 'dueDateDesc') {
+          // Порожні дати завжди після заповнених (в обох напрямках).
+          if (!a.dueDate && !b.dueDate) return b.id - a.id
+          if (!a.dueDate) return 1
+          if (!b.dueDate) return -1
+          const direction = state.sortOrder === 'dueDate' ? 1 : -1
+          return direction * a.dueDate.localeCompare(b.dueDate) || b.id - a.id
+        }
+        return b.id - a.id
+      })
+    },
+  },
 
-export function deleteTask(id) {
-  const index = taskState.tasks.findIndex((task) => task.id === Number(id))
-  if (index === -1) return false
-  taskState.tasks.splice(index, 1)
-  return true
-}
+  actions: {
+    addTask(values) {
+      const projectStore = useProjectsStore()
+      const normalized = normalizeValues(values, projectStore.projects)
+      if (!isValidTask(normalized)) return false
+
+      const nextId = Math.max(0, ...this.tasks.map((task) => task.id)) + 1
+      this.tasks.unshift({ id: nextId, ...normalized })
+      return true
+    },
+
+    updateTask(values) {
+      const task = this.tasks.find((item) => item.id === Number(values?.id))
+      if (!task) return false
+
+      const projectStore = useProjectsStore()
+      const normalized = normalizeValues(values, projectStore.projects)
+      if (!isValidTask(normalized)) return false
+
+      Object.assign(task, normalized)
+      return true
+    },
+
+    deleteTask(id) {
+      const index = this.tasks.findIndex((task) => task.id === Number(id))
+      if (index === -1) return false
+      this.tasks.splice(index, 1)
+      return true
+    },
+
+    setTaskStatus({ id, status }) {
+      if (!allowedStatuses.includes(status)) return false
+      const task = this.tasks.find((item) => item.id === Number(id))
+      if (!task) return false
+      task.status = status
+      return true
+    },
+
+    setTaskPriority({ id, priority }) {
+      if (!allowedPriorities.includes(priority)) return false
+      const task = this.tasks.find((item) => item.id === Number(id))
+      if (!task) return false
+      task.priority = priority
+      return true
+    },
+
+    // Додаткове завдання 4: усі невиконані завдання проєкту → «У роботі».
+    // Повертає кількість змінених завдань.
+    startProjectTasks(projectId) {
+      let changed = 0
+      for (const task of this.tasks) {
+        if (task.projectId === projectId && task.status === 'todo') {
+          task.status = 'progress'
+          changed += 1
+        }
+      }
+      return changed
+    },
+
+    resetFilters() {
+      this.searchText = ''
+      this.selectedStatus = 'all'
+      this.selectedPriority = 'all'
+      this.selectedProject = 'all'
+      this.sortOrder = 'newest'
+      this.onlyActive = false
+      this.onlyNoDate = false
+    },
+  },
+})

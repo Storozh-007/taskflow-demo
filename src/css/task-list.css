@@ -1,4 +1,4 @@
-/* Практична робота № 5. Доповнення до наявних стилів TaskFlow (світла й темна теми). */
+/* Практичні роботи № 5–6. Форми, фільтри та проєкти TaskFlow (світла й темна теми). */
 
 .tf5-heading {
   display: flex;
@@ -154,7 +154,78 @@
 
 .tf5-empty p { margin: 0 0 14px; }
 
+/* Практична робота № 6: централізоване керування проєктами. */
+.tf6-project-list { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+
+.tf6-project-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 12px;
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--app-primary) 8%, var(--app-surface));
+  color: var(--app-text);
+  font-size: 13px;
+}
+
+.tf6-project-pill strong { min-width: 20px; text-align: center; color: var(--taskflow-primary); }
+
+.tf6-project-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+  max-width: 620px;
+}
+
+.tf6-project-form label {
+  display: grid;
+  gap: 7px;
+  color: var(--app-muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tf6-project-form input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid var(--app-border);
+  border-radius: 9px;
+  background: var(--app-surface);
+  color: var(--app-text);
+  font: inherit;
+  font-weight: 400;
+}
+
+.tf6-project-panel .tf5-error { margin-top: 12px; }
+.tf6-project-line { margin-top: 2px; }
+.tf6-bulk { margin: 0 0 14px; }
+
+.tf6-home-projects { margin-top: 22px; }
+.tf6-home-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+
+.tf6-home-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  background: var(--app-surface);
+  color: var(--app-text);
+  font-size: 14px;
+}
+
+.tf6-home-name { font-weight: 700; }
+.tf6-home-meta { color: var(--app-muted); }
+.tf6-home-meta strong { color: var(--taskflow-primary); }
+
 @media (max-width: 680px) {
+  .tf6-project-form { grid-template-columns: 1fr; }
   .tf5-heading { align-items: flex-start; flex-direction: column; }
   .tf5-new { width: 100%; }
   .tf5-form-grid,

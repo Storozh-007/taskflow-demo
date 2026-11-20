@@ -1,7 +1,7 @@
 # TaskFlow
 
 Навчальний PWA-застосунок: Vue 3, Framework7 та Vite.
-Практична робота №5: Керування списком завдань — видалення, зміна статусів, пошук, комбінована фільтрація та сортування.
+Практична робота №6: централізоване керування станом через Pinia — сховища завдань і проєктів, фільтр за проєктом, статистика через getters.
 
 Застосунок: https://taskflow-demo.kpidanil.workers.dev
 
@@ -9,25 +9,27 @@
 
 Попередні версії збережено тегами `kp2-3-complete`, `kp2-4-complete`, `kp2-5-complete`, `kp2-6-complete`.
 
-## Що реалізовано (практична №5)
+## Що реалізовано (практична №6)
 
-1. **Спільне реактивне сховище `src/store/tasks.js`** — `addTask()`, `updateTask()`, `deleteTask()` (`findIndex()` + `splice()`), `setTaskStatus()`, `setTaskPriority()`. Дані зберігаються лише в пам'яті; після F5 повертаються 6 демонстраційних завдань із `src/data/tasks.js`.
-2. **`TaskForm.vue`** — форма створення та редагування з локальною копією стану (`reactive()` + `watch`), перевіркою введення та подіями `save` / `cancel`.
-3. **`TaskListControls.vue`** (новий) — пошук за назвою й описом, фільтри за статусом і пріоритетом, сортування. Не містить масиву завдань: значення надходять через Props, зміни повертаються подіями `update:*`.
-4. **`TaskCard.vue`** — події `edit` і `delete`, кнопки показуються при `editable`.
-5. **`TasksPage.vue`** — обчислюваний `visibleTasks` (`filter()` створює новий масив, `sort()` застосовується до копії), видалення з підтвердженням `window.confirm()`, скидання фільтрів, порожні стани.
-6. **`src/css/task-list.css`** (новий) — адаптивне оформлення панелей, форми й кнопок (світла та темна теми).
+1. **Pinia** підключено в `src/main.js` (`app.use(createPinia())`); `Framework7.use()` та `registerComponents()` збережено.
+2. **`src/store/tasks.js`** — `useTasksStore`: state (`tasks`, фільтри, сортування), getters (`totalTasks`, `completedTasks`, `progressTasks`, `visibleTasks`, `activeTasks`…), actions (`addTask`, `updateTask`, `deleteTask`, `setTaskStatus`, `setTaskPriority`, `resetFilters`).
+3. **`src/store/projects.js`** (новий) — `useProjectsStore`: каталог із трьох проєктів, `addProject()` з перевіркою довжини та унікальності, getters `projectTitle(id)`, `projectCount`, `projectStats`.
+4. **`TaskForm.vue`** — вибір проєкту; **`TaskListControls.vue`** — фільтр за проєктом; **`TaskCard.vue`** — показ назви проєкту.
+5. **`TasksPage.vue`** і **`HomePage.vue`** читають дані через `storeToRefs()`; локальними `ref()` залишено лише `showForm`, `editingId` і поле назви нового проєкту.
+6. Дані, як і раніше, лише в пам'яті: після F5 повертаються демонстраційні записи (IndexedDB — у наступній роботі).
 
 ### Додаткові завдання (1–6)
 
 | № | Завдання | Де реалізовано |
 |---|----------|----------------|
-| 1 | Кнопка «Тільки невиконані» разом з іншими умовами | `TaskListControls.vue`, `visibleTasks` |
-| 2 | Сортування за статусом: У роботі → Заплановано → Виконано | `TasksPage.vue` (`statusWeight`) |
-| 3 | Частка виконаних серед знайдених завдань (%) | `donePercent` біля лічильника |
-| 4 | Кнопка «Очистити пошук» лише за непорожнього тексту | `TaskListControls.vue` (`v-if="search.trim()"`) |
-| 5 | Окреме пояснення, коли видалено всі завдання | `TasksPage.vue` (`data-testid="empty-all"`) |
-| 6 | Сортування за терміном у зворотному порядку; порожні дати — в кінці | `dueDateDesc` |
+| 1 | Getter `projectStats` | `useProjectsStore` |
+| 2 | Блок «Проєкти» на головній: назва та кількість невиконаних | `HomePage.vue` |
+| 3 | Відсоток виконання проєкту (0 % за порожнього проєкту) | `projectStats.percent` |
+| 4 | Action групового переведення запланованих завдань проєкту в «У роботі» з підтвердженням | `startProjectTasks()`, `TasksPage.vue` |
+| 5 | Фільтр «Лише без терміну» у state та `visibleTasks` | `onlyNoDate` |
+| 6 | Перевірка стану Pinia (`$pinia.state`) | див. звіт |
+
+Із практичної №5 збережено: пошук, статус, пріоритет, сортування, «Тільки невиконані», видалення з підтвердженням.
 
 ## Запуск та тестування
 
@@ -57,7 +59,7 @@ src/
 │   ├── AppTabbar.vue
 │   ├── PriorityBadge.vue
 │   ├── StatusBadge.vue
-│   ├── TaskCard.vue            # Оновлено (edit, delete)
+│   ├── TaskCard.vue            # Оновлено (projectTitle)
 │   ├── TaskCounter.vue
 │   ├── TaskForm.vue            # Оновлено (практична №5)
 │   └── TaskListControls.vue    # Створено (практична №5)
