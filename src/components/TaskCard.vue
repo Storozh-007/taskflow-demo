@@ -8,9 +8,8 @@ const props = defineProps({
   editable: { type: Boolean, default: false },
 });
 const titleId = useId();
-const emit = defineEmits(['status-change', 'priority-change', 'edit']);
+const emit = defineEmits(['status-change', 'priority-change', 'edit', 'delete']);
 
-const categoryLabels = { study: 'Навчання', work: 'Робота', personal: 'Особисте' };
 const statusSequence = ['todo', 'progress', 'done'];
 const prioritySequence = ['low', 'medium', 'high'];
 
@@ -59,17 +58,17 @@ function changePriority() {
         />
         <div class="task-details">
           <h3 :id="titleId" class="task-title">{{ task.title }}</h3>
-          <p class="task-description">{{ task.description }}</p>
+          <p class="task-description">{{ task.description || 'Без опису' }}</p>
           <div class="tf3-card-meta">
             <StatusBadge :status="task.status" />
             <PriorityBadge :priority="task.priority" />
-            <span v-if="task.category" class="tf4-category-badge">{{ categoryLabels[task.category] ?? task.category }}</span>
           </div>
           <div class="tf3-meta-date">Термін: {{ formattedDate }}</div>
           <div class="tf3-card-actions">
             <button type="button" class="tf3-action tf3-action--primary" @click="changeStatus">{{ statusActionText }}</button>
             <button type="button" class="tf3-action" @click="changePriority">Змінити пріоритет</button>
-            <button v-if="editable" type="button" class="tf3-action tf4-edit-action" @click="emit('edit', task.id)">Редагувати</button>
+            <button v-if="editable" type="button" class="tf3-action" @click="emit('edit', task.id)">Редагувати</button>
+            <button v-if="editable" type="button" class="tf3-action tf5-danger" @click="emit('delete', task.id)">Видалити</button>
           </div>
         </div>
       </div>
