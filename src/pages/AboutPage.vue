@@ -13,6 +13,7 @@
       </div>
       <div class="info-card"><h3>Версія</h3><p>1.0.0 — навчальний проєкт</p></div>
       <f7-button large outline href="/help/" class="help-button">Довідка з використання</f7-button>
+      <f7-button large outline href="/settings/" class="help-button">Налаштування і локальні дані</f7-button>
     </div>
     <template #fixed><AppTabbar active="about" /></template>
   </f7-page>

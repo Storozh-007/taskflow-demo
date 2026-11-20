@@ -7,8 +7,15 @@ import TaskForm from '../components/TaskForm.vue'
 import TaskListControls from '../components/TaskListControls.vue'
 import { useTasksStore } from '../store/tasks'
 import { useProjectsStore } from '../store/projects'
+import {
+  persistenceState,
+  retrySave,
+  buildExport,
+  replaceAllData,
+} from '../services/persistence'
 import '../css/task-components.css'
 import '../css/task-list.css'
+import '../css/persistence.css'
 
 const taskStore = useTasksStore()
 const projectStore = useProjectsStore()
@@ -88,6 +95,62 @@ function createProject() {
   selectedProject.value = project.id
 }
 
+const saveMessage = computed(() => {
+  if (persistenceState.status === 'loading') return 'Завантаження локальних даних…'
+  if (persistenceState.status === 'saving') return 'Збереження змін у IndexedDB…'
+  if (persistenceState.status === 'saved') return 'Усі зміни збережено в цьому браузері.'
+  return persistenceState.error || 'Помилка локального збереження.'
+})
+
+// Додаткове завдання 4 (робота № 7): час останнього успішного збереження.
+const lastSavedText = computed(() => {
+  const date = persistenceState.lastSavedAt
+  if (!date) return ''
+  return new Intl.DateTimeFormat('uk-UA', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+  }).format(date)
+})
+
+// Додаткові завдання 1–2 (робота № 7): експорт та імпорт JSON.
+const importInput = ref(null)
+const transferMessage = ref('')
+const transferIsError = ref(false)
+
+function exportJson() {
+  const blob = new Blob([JSON.stringify(buildExport(), null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `taskflow-export-${new Date().toISOString().slice(0, 10)}.json`
+  link.click()
+  URL.revokeObjectURL(url)
+  transferIsError.value = false
+  transferMessage.value = 'Файл експорту сформовано.'
+}
+
+async function importJson(event) {
+  const file = event.target.files?.[0]
+  event.target.value = ''
+  if (!file) return
+  transferIsError.value = true
+  let data
+  try {
+    data = JSON.parse(await file.text())
+  } catch {
+    transferMessage.value = 'Імпорт скасовано: файл не є коректним JSON.'
+    return
+  }
+  const message = 'Імпорт замінить усі наявні завдання та проєкти. Продовжити?'
+  if (!window.confirm(message)) {
+    transferMessage.value = 'Імпорт скасовано користувачем.'
+    return
+  }
+  const problem = replaceAllData(data)
+  transferMessage.value = problem ? `Імпорт скасовано: ${problem}` : 'Дані імпортовано.'
+  transferIsError.value = Boolean(problem)
+}
+
 // Додаткове завдання 4: групове переведення завдань проєкту в «У роботі».
 function startAllInProject() {
   if (!currentProject.value) return
@@ -115,6 +178,34 @@ function startAllInProject() {
           + Додати завдання
         </button>
       </div>
+
+      <section
+        class="tf7-persistence"
+        :class="`tf7-persistence--${persistenceState.status}`"
+        role="status"
+        aria-live="polite"
+        data-testid="persistence"
+      >
+        <strong>Локальне збереження</strong>
+        <span>{{ saveMessage }}</span>
+        <button
+          v-if="persistenceState.canRetry"
+          type="button"
+          class="tf5-btn"
+          @click="retrySave"
+        >
+          Повторити збереження
+        </button>
+        <div v-if="lastSavedText" class="tf7-last-saved">Останнє збереження: {{ lastSavedText }}</div>
+        <div class="tf7-transfer">
+          <button type="button" class="tf5-btn" @click="exportJson">Експорт JSON</button>
+          <button type="button" class="tf5-btn" @click="importInput.click()">Імпорт JSON</button>
+          <input ref="importInput" type="file" accept="application/json,.json" hidden @change="importJson" />
+        </div>
+        <p v-if="transferMessage" class="tf7-transfer-msg" :class="{ 'tf7-transfer-msg--error': transferIsError }">
+          {{ transferMessage }}
+        </p>
+      </section>
 
       <section class="tf5-panel tf6-project-panel" aria-label="Проєкти">
         <h2>Мої проєкти</h2>

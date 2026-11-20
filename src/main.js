@@ -6,10 +6,23 @@ import 'framework7/css/bundle';
 import 'framework7-icons/css/framework7-icons.css';
 import './css/app.css';
 import App from './App.vue';
+import { initializePersistence } from './services/persistence.js';
+
+// Залишаємо реєстрацію Framework7, необхідну з практичної № 2.
 Framework7.use(Framework7Vue);
+
 const app = createApp(App);
-// Підключаємо Pinia до спільного екземпляра Vue-застосунку.
-app.use(createPinia());
-// Реєстрацію компонентів Framework7 зберігаємо.
+const pinia = createPinia();
+app.use(pinia);
 registerComponents(app);
-app.mount('#app');
+
+// Спочатку відновлюємо дані, а вже потім показуємо інтерфейс.
+async function bootstrap() {
+  await initializePersistence(pinia);
+  app.mount('#app');
+}
+
+bootstrap().catch((error) => {
+  console.error('TaskFlow: помилка запуску:', error);
+  app.mount('#app');
+});

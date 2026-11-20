@@ -18,12 +18,14 @@
     "framework7": "^9.2.0",
     "framework7-icons": "^5.0.5",
     "framework7-vue": "^9.2.0",
+    "idb": "^8.0.4",
     "pinia": "^4.1.0",
     "vue": "^3.5.22"
   },
   "devDependencies": {
     "@vite-pwa/assets-generator": "^1.0.2",
     "@vitejs/plugin-vue": "^6.0.1",
+    "fake-indexeddb": "^6.2.8",
     "sharp": "^0.35.5",
     "vite": "^7.1.9",
     "vite-plugin-pwa": "^1.1.0",

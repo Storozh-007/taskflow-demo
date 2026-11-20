@@ -1,7 +1,7 @@
 # TaskFlow
 
 Навчальний PWA-застосунок: Vue 3, Framework7 та Vite.
-Практична робота №6: централізоване керування станом через Pinia — сховища завдань і проєктів, фільтр за проєктом, статистика через getters.
+Практична робота №7: постійне локальне зберігання завдань і проєктів у IndexedDB (бібліотека idb) з інтеграцією до Pinia.
 
 Застосунок: https://taskflow-demo.kpidanil.workers.dev
 
@@ -9,27 +9,27 @@
 
 Попередні версії збережено тегами `kp2-3-complete`, `kp2-4-complete`, `kp2-5-complete`, `kp2-6-complete`.
 
-## Що реалізовано (практична №6)
+## Що реалізовано (практична №7)
 
-1. **Pinia** підключено в `src/main.js` (`app.use(createPinia())`); `Framework7.use()` та `registerComponents()` збережено.
-2. **`src/store/tasks.js`** — `useTasksStore`: state (`tasks`, фільтри, сортування), getters (`totalTasks`, `completedTasks`, `progressTasks`, `visibleTasks`, `activeTasks`…), actions (`addTask`, `updateTask`, `deleteTask`, `setTaskStatus`, `setTaskPriority`, `resetFilters`).
-3. **`src/store/projects.js`** (новий) — `useProjectsStore`: каталог із трьох проєктів, `addProject()` з перевіркою довжини та унікальності, getters `projectTitle(id)`, `projectCount`, `projectStats`.
-4. **`TaskForm.vue`** — вибір проєкту; **`TaskListControls.vue`** — фільтр за проєктом; **`TaskCard.vue`** — показ назви проєкту.
-5. **`TasksPage.vue`** і **`HomePage.vue`** читають дані через `storeToRefs()`; локальними `ref()` залишено лише `showForm`, `editingId` і поле назви нового проєкту.
-6. Дані, як і раніше, лише в пам'яті: після F5 повертаються демонстраційні записи (IndexedDB — у наступній роботі).
+1. **`src/services/database.js`** — база `taskflow-db` (версія 1) зі сховищами `tasks` (ключ `id`), `projects` (ключ `id`), `metadata`; читання знімка в одній `readonly`-транзакції та атомарний запис у `readwrite`-транзакції з явним `abort()` у разі помилки.
+2. **`src/services/persistence.js`** — hydration через `$patch()` до монтування, одноразовий запис демонстраційних даних (прапорець `initialized`), `$subscribe()` на обох сховищах Pinia (зберігаються лише `tasks`, `projects`, `nextProjectId`; фільтри — ні), черга записів, стани `loading / saving / saved / error`, повторна спроба.
+3. **`src/main.js`** — `bootstrap()`: Pinia → відновлення з IndexedDB → `app.mount()`.
+4. **`TasksPage.vue`** — індикатор «Локальне збереження», кнопка «Повторити збереження», час останнього збереження, експорт та імпорт JSON.
+5. **`src/css/persistence.css`** — оформлення індикатора (світла й темна теми, адаптивність).
+6. Сховища Pinia (`store/tasks.js`, `store/projects.js`) не змінювалися.
 
 ### Додаткові завдання (1–6)
 
 | № | Завдання | Де реалізовано |
 |---|----------|----------------|
-| 1 | Getter `projectStats` | `useProjectsStore` |
-| 2 | Блок «Проєкти» на головній: назва та кількість невиконаних | `HomePage.vue` |
-| 3 | Відсоток виконання проєкту (0 % за порожнього проєкту) | `projectStats.percent` |
-| 4 | Action групового переведення запланованих завдань проєкту в «У роботі» з підтвердженням | `startProjectTasks()`, `TasksPage.vue` |
-| 5 | Фільтр «Лише без терміну» у state та `visibleTasks` | `onlyNoDate` |
-| 6 | Перевірка стану Pinia (`$pinia.state`) | див. звіт |
+| 1 | Експорт JSON | `TasksPage.vue`, `buildExport()` |
+| 2 | Імпорт JSON з перевіркою структури та підтвердженням | `validateSnapshot()`, `replaceAllData()` |
+| 3 | Точкове видалення запису методом `delete()` | `deleteRecord()` у `database.js` |
+| 4 | `lastSavedAt` у `metadata` та на сторінці | `writeSnapshot()`, `TasksPage.vue` |
+| 5 | Сторінка «Налаштування» (лічильники з IndexedDB) | `SettingsPage.vue`, маршрут `/settings/` |
+| 6 | Синхронізація двох вкладок через BroadcastChannel | `persistence.js` |
 
-Із практичної №5 збережено: пошук, статус, пріоритет, сортування, «Тільки невиконані», видалення з підтвердженням.
+Із практичних №5–6 збережено пошук, фільтри, сортування, проєкти, статистику й видалення з підтвердженням.
 
 ## Запуск та тестування
 
@@ -74,6 +74,7 @@ src/
 │   ├── HelpPage.vue
 │   ├── HomePage.vue
 │   └── TasksPage.vue           # Оновлено (практична №5)
+├── services/                   # database.js, persistence.js (IndexedDB)
 ├── store/
 │   └── tasks.js                # Оновлено (практична №5)
 ├── App.vue

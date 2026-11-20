@@ -1,0 +1,64 @@
+/* Практична робота № 7: індикатор локального збереження (світла й темна теми). */
+.tf7-persistence {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin: 0 0 18px;
+  padding: 13px 16px;
+  border: 1px solid var(--app-border);
+  border-left-width: 4px;
+  border-radius: 12px;
+  background: var(--app-surface);
+  color: var(--app-text);
+  font-size: 14px;
+}
+
+.tf7-persistence strong { color: var(--app-text); }
+.tf7-persistence > span { flex: 1 1 240px; color: var(--app-muted); }
+.tf7-persistence--saved { border-left-color: #16a34a; }
+.tf7-persistence--saving { border-left-color: #d97706; }
+.tf7-persistence--loading { border-left-color: #64748b; }
+.tf7-persistence--error {
+  border-color: #fecaca;
+  border-left-color: #dc2626;
+  background: #fef2f2;
+}
+
+.tf7-last-saved,
+.tf7-transfer { flex: 1 1 100%; }
+.tf7-last-saved { color: var(--app-muted); font-size: 13px; }
+.tf7-transfer { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.tf7-transfer-msg {
+  flex: 1 1 100%;
+  margin: 0;
+  color: #166534;
+  font-size: 13px;
+  font-weight: 600;
+}
+.tf7-transfer-msg--error { color: #b91c1c; }
+
+.tf7-settings-grid { display: grid; gap: 12px; margin-top: 14px; }
+.tf7-settings-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  background: var(--app-surface);
+  color: var(--app-text);
+}
+.tf7-settings-row strong { color: var(--taskflow-primary); }
+
+@media (max-width: 680px) {
+  .tf7-persistence { align-items: flex-start; flex-direction: column; }
+  .tf7-persistence > span { flex-basis: auto; }
+}
+
+@media (prefers-color-scheme: dark) {
+  .tf7-persistence--error { border-color: #783743; background: #3f1c23; }
+  .tf7-transfer-msg { color: #86efac; }
+  .tf7-transfer-msg--error { color: #fda4af; }
+}
